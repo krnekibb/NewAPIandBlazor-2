@@ -21,7 +21,7 @@ namespace APIstuff.Controllers
         }
 
         [HttpGet]
-        public async Task<IList<Course>> GetAllStudents()
+        public async Task<IList<Course>> GetAllCourses()
         {
             return await context.Courses
                 .Include(e => e.Enrollments)
