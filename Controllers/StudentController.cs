@@ -29,5 +29,15 @@ namespace APIstuff.Controllers
 
             return students;
         }
+
+        [HttpGet]
+        [Route("{id:int}")]
+        public async Task<Student> GetStudent(int id)
+        {
+            return await context.Students
+                .Include(s => s.Enrollments)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.StudentId == id);
+        }
     }
 }

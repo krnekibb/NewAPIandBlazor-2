@@ -35,8 +35,8 @@ namespace APIstuff.Controllers
         public async Task<Enrollment> GetEnrollment(int id)
         {
             return await context.Enrollments
-                .Include(e => e.Student)
-                .Include(e => e.Course)
+                .Include(s => s.Student)
+                .Include(c => c.Course)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.EnrollmentId == id);
         }
