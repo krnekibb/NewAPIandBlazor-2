@@ -32,13 +32,14 @@ namespace APIstuff.Controllers
 
         [HttpGet]
         [Route("{id:int}")]
-        public async Task<Enrollment> GetEnrollment(int id)
+        public async Task<IList<Enrollment>> GetEnrollmentBySID(int id)
         {
             return await context.Enrollments
                 .Include(s => s.Student)
+                    .Where(sid => sid.StudentId == id)
                 .Include(c => c.Course)
                 .AsNoTracking()
-                .FirstOrDefaultAsync(e => e.EnrollmentId == id);
+                .ToListAsync(); 
         }
     }
 }
