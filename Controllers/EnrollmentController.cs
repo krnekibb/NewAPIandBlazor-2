@@ -20,6 +20,7 @@ namespace APIstuff.Controllers
             this.context = context;
         }
 
+        #region Enrollments
         [HttpGet]
         public async Task<IList<Enrollment>> GetAllEnrollments()
         {
@@ -29,9 +30,11 @@ namespace APIstuff.Controllers
                 .AsNoTracking()
                 .ToListAsync();
         }
+        #endregion
 
+        #region All Enrollments for specific student
         [HttpGet]
-        [Route("{id:int}")]
+        [Route("student/{id:int}")]
         public async Task<IList<Enrollment>> GetEnrollmentBySID(int id)
         {
             return await context.Enrollments
@@ -41,5 +44,34 @@ namespace APIstuff.Controllers
                 .AsNoTracking()
                 .ToListAsync(); 
         }
+        #endregion
+
+        #region All Enrollments for specific course
+        [HttpGet]
+        [Route("course/{id:int}")]
+        public async Task<IList<Enrollment>> GetEnrollmentByCID(int id)
+        {
+            return await context.Enrollments
+                .Include(c => c.Course)
+                    .Where(cid => cid.CourseId == id)
+                .Include(s => s.Student)
+                .AsNoTracking()
+                .ToListAsync();
+        }
+        #endregion
+
+        #region Get specific student via Enrollment
+        [HttpGet]
+        [Route("specificstudent/{id:int}")]
+        public async Task<Enrollment> GetStudentFromEnrollment(int id)
+        {
+            return await context.Enrollments
+                .Include(s => s.Student)
+                    .Where(sid => sid.StudentId == id)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+        #endregion
+
     }
 }

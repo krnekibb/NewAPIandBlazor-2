@@ -1,5 +1,6 @@
 ﻿using APIstuff.DataAccess;
 using APIstuff.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -21,9 +22,11 @@ namespace APIstuff.Controllers
         }
 
         [HttpGet]
-        public async Task<IList<Student>> GetAllStudents()
+        public async Task<ActionResult<IList<Student>>> GetAllStudents()
         {
             var students =  await context.Students
+                .Include(s => s.Enrollments)
+                    .ThenInclude(e => e.Course)
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -32,12 +35,36 @@ namespace APIstuff.Controllers
 
         [HttpGet]
         [Route("{id:int}")]
-        public async Task<Student> GetStudent(int id)
+        public async Task<ActionResult<IList<Student>>> GetStudent(int id)
         {
-            return await context.Students
-                .Include(s => s.Enrollments)
-                .AsNoTracking()
-                .FirstOrDefaultAsync(e => e.StudentId == id);
+            try
+            {
+                var result = await context.Students
+                    .Where(s => s.StudentId == id)
+                    .Include(s => s.Enrollments)
+                        .ThenInclude(s => s.Student.Enrollments)
+                    .Include(c => c.Enrollments)
+                        .ThenInclude(c => c.Course.Enrollments)
+                    .Select(s => s.Enrollments)      
+                    .ToListAsync();
+
+                if (result == null)
+                {
+                    return NotFound();
+                }
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from the database.");
+            }
+
         }
+
+        //[HttpPost]
+        //public async Task<Student> NewStudent(Student newStudent)
+        //{ 
+            
+        //}
     }
 }

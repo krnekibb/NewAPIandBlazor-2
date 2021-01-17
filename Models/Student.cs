@@ -17,6 +17,6 @@ namespace APIstuff.Models
         public DateTime EnrollmentDate { get; set; }
 
         [JsonIgnore]
-        public List<Enrollment> Enrollments { get; set; }
+        public ICollection<Enrollment> Enrollments { get; set; }
     }
 }
