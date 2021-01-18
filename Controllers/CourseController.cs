@@ -1,5 +1,6 @@
 ﻿using APIstuff.DataAccess;
 using APIstuff.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -21,12 +22,25 @@ namespace APIstuff.Controllers
         }
 
         [HttpGet]
-        public async Task<IList<Course>> GetAllCourses()
+        public async Task<ActionResult<IList<Course>>> GetAllCourses()
         {
-            return await context.Courses
+            try
+            {
+                var result = await context.Courses
                 .Include(e => e.Enrollments)
                 .AsNoTracking()
                 .ToListAsync();
+
+                if (result == null)
+                {
+                    return NotFound();
+                }
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error receiving data from database");
+            }
         }
     }
 }

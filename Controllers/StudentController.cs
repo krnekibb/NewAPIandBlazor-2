@@ -1,10 +1,10 @@
 ﻿using APIstuff.DataAccess;
 using APIstuff.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace APIstuff.Controllers
@@ -21,23 +21,47 @@ namespace APIstuff.Controllers
         }
 
         [HttpGet]
-        public async Task<IList<Student>> GetAllStudents()
+        public async Task<ActionResult<IList<Student>>> GetAllStudents()
         {
-            var students =  await context.Students
+            try
+            {
+                var students = await context.Students
                 .AsNoTracking()
                 .ToListAsync();
 
-            return students;
+                if (students == null)
+                {
+                    return NotFound();
+                }
+                return Ok(students);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error receiving data from database");
+            }
         }
 
         [HttpGet]
         [Route("{id:int}")]
-        public async Task<Student> GetStudent(int id)
+        public async Task<ActionResult<Student>> GetStudent(int id)
         {
-            return await context.Students
+            try
+            {
+                var result = await context.Students
                 .Include(s => s.Enrollments)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.StudentId == id);
+
+                if (result == null)
+                {
+                    return NotFound();
+                }
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error receiving data from database");
+            }
         }
     }
 }

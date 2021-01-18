@@ -1,5 +1,6 @@
 ﻿using APIstuff.DataAccess;
 using APIstuff.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -21,25 +22,51 @@ namespace APIstuff.Controllers
         }
 
         [HttpGet]
-        public async Task<IList<Enrollment>> GetAllEnrollments()
+        public async Task<ActionResult<IList<Enrollment>>> GetAllEnrollments()
         {
-            return await context.Enrollments
+            try
+            {
+                var result = await context.Enrollments
                 .Include(s => s.Student)
                 .Include(c => c.Course)
                 .AsNoTracking()
                 .ToListAsync();
+
+                if (result == null)
+                {
+                    return NotFound();
+                }
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error receiving data from database");
+            }
         }
 
         [HttpGet]
-        [Route("{id:int}")]
-        public async Task<IList<Enrollment>> GetEnrollmentBySID(int id)
+        [Route("studentid/{id:int}")]
+        public async Task<ActionResult<IList<Enrollment>>> GetEnrollmentBySID(int id)
         {
-            return await context.Enrollments
+            try
+            {
+                var result = await context.Enrollments
                 .Include(s => s.Student)
                     .Where(sid => sid.StudentId == id)
                 .Include(c => c.Course)
                 .AsNoTracking()
-                .ToListAsync(); 
+                .ToListAsync();
+
+                if (result == null)
+                {
+                    return NotFound();
+                }
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error receiving data from database");
+            }
         }
     }
 }
