@@ -67,6 +67,7 @@ namespace APIstuff.Controllers
         //    }
         //}
 
+        //pustimo student controller GetStudent
         [HttpGet]
         [Route("{id:int}")]
         public async Task<ActionResult<IList<Student>>> GetStudent(int id)
