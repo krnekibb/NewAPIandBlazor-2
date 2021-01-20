@@ -42,46 +42,16 @@ namespace APIstuff.Controllers
             }
         }
 
-        //[HttpGet]
-        //[Route("{id:int}")]
-        //public async Task<ActionResult<Student>> GetStudent(int id)
-        //{
-        //    try
-        //    {
-        //        var result = await context.Students
-        //            .AsNoTracking()
-        //            .FirstOrDefaultAsync(s => s.StudentId == id);
-        //        //.Include(s => s.Enrollments)
-        //        //.AsNoTracking()
-        //        //.FirstOrDefaultAsync(e => e.StudentId == id);
-
-        //        if (result == null)
-        //        {
-        //            return NotFound();
-        //        }
-        //        return Ok(result);
-        //    }
-        //    catch (Exception)
-        //    {
-        //        return StatusCode(StatusCodes.Status500InternalServerError, "Error receiving data from database");
-        //    }
-        //}
-
-        //pustimo student controller GetStudent
         [HttpGet]
         [Route("{id:int}")]
-        public async Task<ActionResult<IList<Student>>> GetStudent(int id)
+        public async Task<ActionResult<Student>> GetStudent(int id)
         {
             try
             {
                 var result = await context.Students
-                    .Where(s => s.StudentId == id)
-                    //.Include(s => s.Enrollments)
-                    //    .ThenInclude(s => s.Student.Enrollments)
-                    //.Include(c => c.Enrollments)
-                    //    .ThenInclude(c => c.Course.Enrollments)
-                    .Select(s => new { s.FirstName, s.LastName, s.EnrollmentDate, s.Enrollments })
-                    .ToListAsync();
+                    .Include(s => s.Enrollments)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(s => s.StudentId == id);
 
                 if (result == null)
                 {
@@ -91,7 +61,7 @@ namespace APIstuff.Controllers
             }
             catch (Exception)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from the database.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error receiving data from database");
             }
         }
     }
