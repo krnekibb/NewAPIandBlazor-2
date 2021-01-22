@@ -45,7 +45,7 @@ namespace APIstuff.Controllers
         }
 
         [HttpGet]
-        [Route("studentid/{id:int}")]
+        [Route("allEnrollmentsStudentId/{id:int}")]
         public async Task<ActionResult<IList<Enrollment>>> GetEnrollmentBySID(int id)
         {
             try
@@ -66,6 +66,61 @@ namespace APIstuff.Controllers
             catch (Exception)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error receiving data from database");
+            }
+        }
+
+        [HttpGet]
+        [Route("studentId/{id:int}")]
+        public async Task<ActionResult<Enrollment>> GetSingleEnrollmentBySID(int id)
+        {
+            try
+            {
+                var result = await context.Enrollments
+                .Include(s => s.Student)
+                    .Where(sid => sid.StudentId == id)
+                .Include(c => c.Course)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+                if (result == null)
+                {
+                    return NotFound();
+                }
+                return Ok(result);
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error receiving data from database");
+            }
+        }
+
+        [HttpPost]
+        public async Task<ActionResult<Enrollment>> CreateEnrollment(Enrollment newEnrollment)
+        {
+            try
+            {
+                if (newEnrollment == null)
+                {
+                    return BadRequest();
+                }
+
+                var tempEnrollment = await context.Enrollments
+                    .FirstOrDefaultAsync(s => s.StudentId == newEnrollment.StudentId);
+
+                if (tempEnrollment != null)
+                {
+                    ModelState.AddModelError("studentId", "Student ID already in use");
+                    return BadRequest(ModelState);
+                }
+
+                var createdEnrollment = await context.Enrollments.AddAsync(newEnrollment);
+                await context.SaveChangesAsync();
+
+                return createdEnrollment.Entity;
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from the database.");
             }
         }
     }

@@ -50,6 +50,7 @@ namespace APIstuff.Controllers
             {
                 var result = await context.Students
                     .Include(s => s.Enrollments)
+                        .ThenInclude(e => e.Course)
                     .AsNoTracking()
                     .FirstOrDefaultAsync(s => s.StudentId == id);
 
@@ -64,5 +65,35 @@ namespace APIstuff.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error receiving data from database");
             }
         }
+
+        [HttpPost]
+        public async Task<ActionResult<Student>> CreateStudent (Student newStudent)
+        {
+            try
+            {
+                if (newStudent == null)
+                {
+                    return BadRequest();
+                }
+
+                var tempStudent = await context.Students
+                    .FirstOrDefaultAsync(s => s.StudentId == newStudent.StudentId);
+
+                if (tempStudent != null)
+                {
+                    ModelState.AddModelError("studentId", "Student ID already in use");
+                    return BadRequest(ModelState);
+                }
+
+                var createdStudent = await context.Students.AddAsync(newStudent);
+                await context.SaveChangesAsync();
+
+                return createdStudent.Entity;
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error retrieving data from the database.");
+            }
+        } 
     }
 }
