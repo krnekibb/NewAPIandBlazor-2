@@ -50,8 +50,19 @@ namespace APIstuff.Controllers
             {
                 var result = await context.Students
                     .Include(s => s.Enrollments)
+                        .ThenInclude(e => e.Course)
                     .AsNoTracking()
-                    .FirstOrDefaultAsync(s => s.StudentId == id);
+                    .FirstOrDefaultAsync(m => m.StudentId == id);
+
+                //var result = await context.Students
+                //    .Where(s => s.StudentId == id)
+                //    .Select(s => new
+                //    {
+                //        Student = s,
+                //        Enrollment = s.Enrollments
+
+                //    })
+                //    .FirstOrDefaultAsync();
 
                 if (result == null)
                 {

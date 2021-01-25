@@ -68,5 +68,35 @@ namespace APIstuff.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error receiving data from database");
             }
         }
+
+        [HttpPost]
+        public async Task<ActionResult<Enrollment>> CreateStudentEnrollment(Enrollment newEnrollment)
+        {
+            try
+            {
+                if (newEnrollment == null)
+                {
+                    return BadRequest();
+                }
+
+                var tempEnrollment = await context.Enrollments
+                    .Where(e => e.StudentId == newEnrollment.StudentId)
+                    .FirstOrDefaultAsync();
+
+                if (tempEnrollment != null)
+                {
+                    ModelState.AddModelError("StudentId", "Student Id already in use!");
+                    return BadRequest(ModelState);
+                }
+
+                var createStudentEnrollment = await context.Enrollments.AddAsync(newEnrollment);
+                await context.SaveChangesAsync();
+                return createStudentEnrollment.Entity;
+            }
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error receiving data from database");
+            }
+        }
     }
 }

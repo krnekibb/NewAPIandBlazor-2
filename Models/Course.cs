@@ -15,6 +15,6 @@ namespace APIstuff.Models
         public int Credits { get; set; }
 
         [JsonIgnore]
-        public ICollection<Enrollment> Enrollments { get; set; }
+        public virtual ICollection<Enrollment> Enrollments { get; set; }
     }
 }
