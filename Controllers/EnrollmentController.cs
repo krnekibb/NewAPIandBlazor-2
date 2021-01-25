@@ -98,5 +98,34 @@ namespace APIstuff.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "Error receiving data from database");
             }
         }
+
+        //ne mores preko enrollment deletat Student ali pa Course rabis loceno
+        [HttpDelete]
+        public async Task<ActionResult<Enrollment>> DeleteEnrollment(int id)
+        {
+            try
+            {
+                var tempEnrollment = await context.Enrollments
+                    .Include(s => s.Student)
+                    //.Include(c => c.Course)
+                    .FirstOrDefaultAsync(e => e.StudentId == id);
+
+                if (tempEnrollment == null)
+                {
+                    return BadRequest(); 
+                }
+
+                context.Enrollments.Remove(tempEnrollment);
+                await context.SaveChangesAsync();
+
+                return tempEnrollment;
+            }
+
+            catch (Exception)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error receiving data from database");
+            }
+
+        } 
     }
 }
